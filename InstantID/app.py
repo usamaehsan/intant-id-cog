@@ -30,7 +30,12 @@ hf_hub_download(repo_id="InstantX/InstantID", filename="ControlNetModel/diffusio
 hf_hub_download(repo_id="InstantX/InstantID", filename="ip-adapter.bin", local_dir="./checkpoints")
 
 # Load face encoder
-app = FaceAnalysis(name='antelopev2', root='./', providers=['CPUExecutionProvider'])
+# app = FaceAnalysis(name='antelopev2', root='./', providers=['CPUExecutionProvider'])
+app= FaceAnalysis(
+            name="antelopev2",
+            root="./",
+            providers=["CUDAExecutionProvider", "CPUExecutionProvider"],
+        )
 app.prepare(ctx_id=0, det_size=(640, 640))
 
 # Path to InstantID models
