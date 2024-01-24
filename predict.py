@@ -5,6 +5,7 @@ from cog import BasePredictor, Input, Path
 from instantid.style_template import styles
 import random
 import numpy as np
+from PIL import Image
 
 STYLE_NAMES = list(styles.keys())
 
@@ -102,9 +103,11 @@ class Predictor(BasePredictor):
         if not seed:
             seed = random.randint(100, np.iinfo(np.int32).max)
         
+        face_image = Image.open(face_image)
         face_image= resize_image(face_image, max_width, max_height)
 
         if pose_image:
+            pose_image = Image.open(pose_image)
             pose_image= resize_image(pose_image, max_width, max_height)
         
         images, _ = self.generate_image(
