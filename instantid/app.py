@@ -14,7 +14,9 @@ from insightface.app import FaceAnalysis
 
 from .style_template import styles
 from .pipeline_stable_diffusion_xl_instantid import StableDiffusionXLInstantIDPipeline
+import os
 
+script_dir = os.path.dirname(os.path.realpath(__file__))
 # import gradio as gr
 
 # global variable
@@ -33,7 +35,7 @@ hf_hub_download(repo_id="InstantX/InstantID", filename="ip-adapter.bin", local_d
 # app = FaceAnalysis(name='antelopev2', root='./', providers=['CPUExecutionProvider'])
 app= FaceAnalysis(
             name="antelopev2",
-            root="./",
+            root=script_dir,
             providers=["CUDAExecutionProvider", "CPUExecutionProvider"],
         )
 app.prepare(ctx_id=0, det_size=(640, 640))
@@ -194,9 +196,9 @@ def generate_image(face_image, pose_image, prompt, negative_prompt, style_name, 
     
     # Extract face features
     face_info = app.get(face_image_cv2)
-    
-    # if len(face_info) == 0:
-    #     raise gr.Error(f"Cannot find any face in the image! Please upload another person image")
+    print(face_info)
+    if len(face_info) == 0:
+        raise gr.Error(f"Cannot find any face in the image! Please upload another person image")
     
     face_info = sorted(face_info, key=lambda x:(x['bbox'][2]-x['bbox'][0])*x['bbox'][3]-x['bbox'][1])[-1]  # only use the maximum face
     face_emb = face_info['embedding']
