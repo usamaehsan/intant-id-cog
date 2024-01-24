@@ -1,0 +1,27 @@
+build:
+  gpu: true
+  system_packages:
+    - "python3-opencv"
+  cuda: "11.6"
+  python_version: "3.9"
+  python_packages:
+    - "diffusers==0.25.0"
+    - "peft"
+    - "torch==2.0.0"
+    - "opencv-contrib-python-headless==4.6.0.66"
+    - "controlnet-aux==0.0.3"
+    - "transformers"
+    - "xformers"
+    - "accelerate"
+    - "triton"
+    - "compel"
+    - "insightface"
+    - "opencv-python"
+    - "huggingface-hub==0.20.2"
+    - "omegaconf"
+    - "einops"
+    - "onnxruntime-gpu"
+    - "spaces==0.19.4"
+    # - "git+https://github.com/openai/consistencydecoder.git"
+
+predict: "predict.py:Predictor"
