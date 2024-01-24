@@ -16,9 +16,11 @@ from diffusers.models import ControlNetModel
 import insightface
 from insightface.app import FaceAnalysis
 
-from style_template import styles
-from pipeline_stable_diffusion_xl_instantid import StableDiffusionXLInstantIDPipeline
+from .style_template import styles
+from .pipeline_stable_diffusion_xl_instantid import StableDiffusionXLInstantIDPipeline
+import os
 
+script_dir = os.path.dirname(os.path.realpath(__file__))
 import gradio as gr
 
 # global variable
@@ -34,7 +36,7 @@ hf_hub_download(repo_id="InstantX/InstantID", filename="ControlNetModel/diffusio
 hf_hub_download(repo_id="InstantX/InstantID", filename="ip-adapter.bin", local_dir="./checkpoints")
 
 # Load face encoder
-app = FaceAnalysis(name='antelopev2', root='./', providers=['CPUExecutionProvider'])
+app = FaceAnalysis(name='antelopev2', root=script_dir, providers=['CPUExecutionProvider'])
 app.prepare(ctx_id=0, det_size=(640, 640))
 
 # Path to InstantID models
@@ -175,7 +177,7 @@ def apply_style(style_name: str, positive: str, negative: str = "") -> tuple[str
     return p.replace("{prompt}", positive), n + ' ' + negative
 
 @spaces.GPU
-def generate_image(face_image, pose_image, prompt, negative_prompt, style_name, enhance_face_region, num_steps, identitynet_strength_ratio, adapter_strength_ratio, guidance_scale, seed):
+def generate_image(face_image, pose_image, prompt, negative_prompt, style_name, enhance_face_region, num_steps, identitynet_strength_ratio, adapter_strength_ratio, guidance_scale, seed, progress=gr.Progress(track_tqdm=True)):
 
     if face_image is None:
         raise gr.Error(f"Cannot find any input face image! Please upload the face image")
@@ -292,3 +294,125 @@ tips = r"""
 css = '''
 .gradio-container {width: 85% !important}
 '''
+# with gr.Blocks(css=css) as demo:
+
+#     # description
+#     gr.Markdown(title)
+#     gr.Markdown(description)
+
+#     with gr.Row():
+#         with gr.Column():
+            
+#             # upload face image
+#             face_files = gr.Files(
+#                         label="Upload a photo of your face",
+#                         file_types=["image"]
+#                     )
+#             uploaded_faces = gr.Gallery(label="Your images", visible=False, columns=1, rows=1, height=512)
+#             with gr.Column(visible=False) as clear_button_face:
+#                 remove_and_reupload_faces = gr.ClearButton(value="Remove and upload new ones", components=face_files, size="sm")
+            
+#             # optional: upload a reference pose image
+#             pose_files = gr.Files(
+#                         label="Upload a reference pose image (optional)",
+#                         file_types=["image"]
+#                     )
+#             uploaded_poses = gr.Gallery(label="Your images", visible=False, columns=1, rows=1, height=512)
+#             with gr.Column(visible=False) as clear_button_pose:
+#                 remove_and_reupload_poses = gr.ClearButton(value="Remove and upload new ones", components=pose_files, size="sm")
+            
+#             # prompt
+#             prompt = gr.Textbox(label="Prompt",
+#                        info="Give simple prompt is enough to achieve good face fedility",
+#                        placeholder="A photo of a person",
+#                        value="")
+            
+#             submit = gr.Button("Submit", variant="primary")
+            
+#             style = gr.Dropdown(label="Style template", choices=STYLE_NAMES, value=DEFAULT_STYLE_NAME)
+            
+#             # strength
+#             identitynet_strength_ratio = gr.Slider(
+#                 label="IdentityNet strength (for fedility)",
+#                 minimum=0,
+#                 maximum=1.5,
+#                 step=0.05,
+#                 value=0.80,
+#             )
+#             adapter_strength_ratio = gr.Slider(
+#                 label="Image adapter strength (for detail)",
+#                 minimum=0,
+#                 maximum=1.5,
+#                 step=0.05,
+#                 value=0.80,
+#             )
+            
+#             with gr.Accordion(open=False, label="Advanced Options"):
+#                 negative_prompt = gr.Textbox(
+#                     label="Negative Prompt", 
+#                     placeholder="low quality",
+#                     value="(lowres, low quality, worst quality:1.2), (text:1.2), watermark, (frame:1.2), deformed, ugly, deformed eyes, blur, out of focus, blurry, deformed cat, deformed, photo, anthropomorphic cat, monochrome, pet collar, gun, weapon, blue, 3d, drones, drone, buildings in background, green",
+#                 )
+#                 num_steps = gr.Slider( 
+#                     label="Number of sample steps",
+#                     minimum=20,
+#                     maximum=100,
+#                     step=1,
+#                     value=30,
+#                 )
+#                 guidance_scale = gr.Slider(
+#                     label="Guidance scale",
+#                     minimum=0.1,
+#                     maximum=10.0,
+#                     step=0.1,
+#                     value=5,
+#                 )
+#                 seed = gr.Slider(
+#                     label="Seed",
+#                     minimum=0,
+#                     maximum=MAX_SEED,
+#                     step=1,
+#                     value=42,
+#                 )
+#                 randomize_seed = gr.Checkbox(label="Randomize seed", value=True)
+#                 enhance_face_region = gr.Checkbox(label="Enhance non-face region", value=True)
+
+#         with gr.Column():
+#             gallery = gr.Gallery(label="Generated Images")
+#             usage_tips = gr.Markdown(label="Usage tips of InstantID", value=tips ,visible=False)
+
+#         face_files.upload(fn=swap_to_gallery, inputs=face_files, outputs=[uploaded_faces, clear_button_face, face_files])
+#         pose_files.upload(fn=swap_to_gallery, inputs=pose_files, outputs=[uploaded_poses, clear_button_pose, pose_files])
+
+#         remove_and_reupload_faces.click(fn=remove_back_to_files, outputs=[uploaded_faces, clear_button_face, face_files])
+#         remove_and_reupload_poses.click(fn=remove_back_to_files, outputs=[uploaded_poses, clear_button_pose, pose_files])
+
+#         submit.click(
+#             fn=remove_tips,
+#             outputs=usage_tips,            
+#         ).then(
+#             fn=randomize_seed_fn,
+#             inputs=[seed, randomize_seed],
+#             outputs=seed,
+#             queue=False,
+#             api_name=False,
+#         ).then(
+#             fn=generate_image,
+#             inputs=[face_files, pose_files, prompt, negative_prompt, style, enhance_face_region, num_steps, identitynet_strength_ratio, adapter_strength_ratio, guidance_scale, seed],
+#             outputs=[gallery, usage_tips]
+#         )
+    
+#     gr.Examples(
+#         examples=get_example(),
+#         inputs=[face_files, prompt, style, negative_prompt],
+#         run_on_click=True,
+#         fn=upload_example_to_gallery,
+#         outputs=[uploaded_faces, clear_button_face, face_files],
+#         cache_examples=True
+#     )
+    
+#     gr.Markdown(article)
+
+
+# demo.queue(api_open=False)
+# demo.launch()
