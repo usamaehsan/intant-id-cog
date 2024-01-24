@@ -79,13 +79,13 @@ class Predictor(BasePredictor):
         ),
         identitynet_strength_ratio: float = Input(
             description="for fedility",
-            ge=0.1,
-            le=30.0,
+            ge=0.8,
+            le=2.0,
         ),
         adapter_strength_ratio: float = Input(
             description="for fedility",
-            ge=0.1,
-            le=30.0,
+            ge=0.8,
+            le=2.0,
         ),
         max_width: int = Input(
             description="Max width/Resolution of image",
