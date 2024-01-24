@@ -13,7 +13,7 @@ from diffusers.models import ControlNetModel
 from insightface.app import FaceAnalysis
 
 from .style_template import styles
-from pipeline_stable_diffusion_xl_instantid import StableDiffusionXLInstantIDPipeline
+from .pipeline_stable_diffusion_xl_instantid import StableDiffusionXLInstantIDPipeline
 
 # import gradio as gr
 
