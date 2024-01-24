@@ -2,7 +2,7 @@ import torch
 from typing import List
 from PIL import Image
 from cog import BasePredictor, Input, Path
-from InstantID.style_template import styles
+from .style_template import styles
 import random
 import numpy as np
 
@@ -44,7 +44,7 @@ def resize_image(image, max_width, max_height):
 class Predictor(BasePredictor):
     def setup(self):
         """Load the model into memory to make running multiple predictions efficient"""
-        from InstantID.app import generate_image
+        from .app import generate_image
         self.generate_image = generate_image
 
     @torch.inference_mode()
